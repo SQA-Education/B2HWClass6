@@ -269,7 +269,17 @@ function startRec(){
     spokenText+=e.results[0][0].transcript+' ';
     if(box){box.textContent='Transcript: '+spokenText.trim();box.classList.remove('hidden');}
   };
-  recognition.onerror=function(){};
+  recognition.onerror=function(e){
+    var err=(e&&e.error)?e.error:'unknown';
+    if(err==='no-speech'||err==='aborted')return;
+    if(box){
+      var msg='Transcript unavailable.';
+      if(err==='not-allowed'||err==='service-not-allowed'){msg='Transcript unavailable \u2014 microphone access is blocked. Please allow microphone permission and record again.';}
+      else if(err==='network'){msg='Transcript unavailable \u2014 no internet connection for speech recognition. Your recording timer still works; check your connection and try again.';}
+      else{msg='Transcript unavailable \u2014 speech recognition could not run. Your recording timer still works.';}
+      box.textContent=msg;box.classList.remove('hidden');
+    }
+  };
   recognition.onend=function(){ if(isRec){ try{recognition.start();}catch(e){} } };
   try{recognition.start();}catch(e){}
 }
