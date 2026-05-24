@@ -88,7 +88,7 @@ audio{width:100%;margin-top:14px}.hidden{display:none}
 <div class="reading-box">
 <p><strong>A Workplace Misunderstanding</strong></p>
 <p>Yesterday, Maya sent a message to her teammate, but he misunderstood the deadline. He thought the report was due on Thursday, not Wednesday. Because of that, the team had a stressful morning.</p>
-<p>Maya explained the problem calmly and said, “I’m sorry there was a misunderstanding.” Her teammate apologized too and said he had read the message too quickly. They reviewed the instructions together and fixed the problem before lunch.</p>
+<p>Maya explained the problem calmly and said, &ldquo;I&rsquo;m sorry there was a misunderstanding.&rdquo; Her teammate apologized too and said he had read the message too quickly. They reviewed the instructions together and fixed the problem before lunch.</p>
 <p>In the end, they agreed that clear communication is important because small mistakes can create bigger problems.</p>
 </div>
 <div id="readingQuestions"></div>
@@ -136,7 +136,7 @@ Next time, I would..."></textarea>
 <audio id="audio" controls class="hidden"></audio>
 <div id="transcriptBox" class="transcript-box hidden"></div>
 <div id="sFeedback" class="feedback hidden"></div>
-<button class="btn" id="sBtn" onclick="checkSpeaking()">Continue →</button><button class="btn" style="background:#e5e7eb;color:#333;margin-top:8px" onclick="showSection('s3')">&larr; Back</button>
+<button class="btn" id="sBtn" onclick="checkSpeaking()" disabled>Continue →</button><button class="btn" style="background:#e5e7eb;color:#333;margin-top:8px" onclick="showSection('s3')">&larr; Back</button>
 </div>
 </div>
 
@@ -166,9 +166,11 @@ Next time, I would..."></textarea>
 </div>
 </div>
 
-<script>function setTeacher(sel){
+<script>
+function setTeacher(sel){
   const opt=sel.options[sel.selectedIndex];
-  document.getElementById('teacherName').value=opt?(opt.getAttribute('data-teacher')||''):'';
+  const th=document.getElementById('teacherName');
+  if(th)th.value=opt?(opt.getAttribute('data-teacher')||''):'';
 }
 
 const SESSION='6';
@@ -248,12 +250,10 @@ function checkWriting(){
   var bn=document.getElementById('wBtn');bn.classList.add('hidden');bn.style.display='none';
   var nx=document.getElementById('wNext');nx.classList.remove('hidden');nx.style.display='block';
 }
-function startSpeechRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;speechRec=new SR();speechRec.continuous=false;speechRec.interimResults=true;speechRec.lang='en-US';speechRec.onresult=function(event){let finalTranscript='';for(let i=0;i<event.results.length;i++) finalTranscript += event.results[i][0].transcript+' ';spokenText=finalTranscript.trim();if(spokenText){const box=document.getElementById('transcriptBox');box.textContent='Transcript: '+spokenText;box.classList.remove('hidden');}};speechRec.start();}
-function stopSpeechRecognition(){if(speechRec){try{speechRec.stop();}catch(e){}}}
 function toggleRec(){if(!isRec) startRec(); else stopRec();}
 function startRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('Speech recognition not supported.');return;}
+  if(!SR){alert('Speech recognition not supported in this browser.');return;}
   spokenText='';
   const box=document.getElementById('transcriptBox');
   if(box){box.textContent='';box.classList.add('hidden');}
@@ -262,10 +262,15 @@ function startRec(){
   document.getElementById('recStatus').textContent='Recording... Click again to stop';
   recTimer=setInterval(function(){recTime++;document.getElementById('timer').textContent=Math.floor(recTime/60)+':'+String(recTime%60).padStart(2,'0');},1000);
   recognition=new SR();
-  recognition.continuous=false;recognition.interimResults=false;recognition.lang='en-US';
-  recognition.onresult=function(e){spokenText+=e.results[0][0].transcript+' ';if(box){box.textContent='Transcript: '+spokenText.trim();box.classList.remove('hidden');}};
+  recognition.continuous=false;
+  recognition.interimResults=false;
+  recognition.lang='en-US';
+  recognition.onresult=function(e){
+    spokenText+=e.results[0][0].transcript+' ';
+    if(box){box.textContent='Transcript: '+spokenText.trim();box.classList.remove('hidden');}
+  };
   recognition.onerror=function(){};
-  recognition.onend=function(){if(isRec){try{recognition.start();}catch(e){}}};
+  recognition.onend=function(){ if(isRec){ try{recognition.start();}catch(e){} } };
   try{recognition.start();}catch(e){}
 }
 function stopRec(){
